@@ -1,0 +1,85 @@
+{
+  "name": "vscode-mssqltools",
+  "displayName": "MSSQL Tools",
+  "description": "Compare stored procedures across SQL Server environments directly from VSCode, using your existing MSSQL extension connections.",
+  "version": "0.1.0",
+  "publisher": "marcelomogami",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcelomogami/vscode-mssqltools.git"
+  },
+  "keywords": [
+    "sql",
+    "mssql",
+    "sql server",
+    "stored procedure",
+    "diff"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "extensionDependencies": [
+    "ms-mssql.mssql"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "mssqltools.diffProcedure",
+        "title": "MSSQL Tools: Diff Procedure"
+      },
+      {
+        "command": "mssqltools.openProcedure",
+        "title": "MSSQL Tools: Open Procedure from Environment"
+      },
+      {
+        "command": "mssqltools.openConfig",
+        "title": "MSSQL Tools: Open Config"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "mssqltools.diffProcedure",
+        "key": "ctrl+alt+m",
+        "when": "editorTextFocus && resourceExtname == .sql"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "mssqltools.diffProcedure",
+          "when": "resourceExtname == .sql",
+          "group": "mssqltools@1"
+        },
+        {
+          "command": "mssqltools.openProcedure",
+          "when": "resourceExtname == .sql",
+          "group": "mssqltools@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "build:dev": "node esbuild.js --dev",
+    "package": "npm run build && vsce package --allow-missing-repository",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "test:watch": "node --import tsx --test --watch test/**/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.1",
+    "esbuild": "^0.28.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

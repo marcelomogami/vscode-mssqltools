@@ -1,0 +1,12 @@
+src/**
+test/**
+node_modules/**
+.vscode/**
+esbuild.js
+tsconfig.json
+.gitignore
+.env*
+PLAN.md
+AGENTS.md
+CLAUDE.md
+typings/**
