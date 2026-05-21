@@ -1,20 +1,21 @@
 import * as vscode from "vscode";
-import type { IConnectionInfo } from "vscode-mssql";
 
 interface MssqlProfile {
+  id?: string;
   profileName?: string;
-  server?: string;
   database?: string;
-  user?: string;
-  password?: string;
-  authenticationType?: string;
   [key: string]: unknown;
 }
 
-export function resolveProfile(
+export interface ResolvedConnection {
+  connectionId: string;
+  database?: string;
+}
+
+export function resolveConnectionId(
   connectionName: string,
   database?: string,
-): IConnectionInfo {
+): ResolvedConnection {
   const profiles = vscode.workspace
     .getConfiguration("mssql")
     .get<MssqlProfile[]>("connections") ?? [];
@@ -29,50 +30,14 @@ export function resolveProfile(
     );
   }
 
-  if (!profile.server) {
-    throw new Error(`MSSQL connection "${connectionName}" has no server configured.`);
+  if (!profile.id) {
+    throw new Error(
+      `MSSQL connection "${connectionName}" has no id. Try removing and re-adding the connection in the SQL Server panel.`,
+    );
   }
 
   return {
-    server: profile.server,
-    database: database ?? profile.database ?? "",
-    user: profile.user ?? "",
-    password: profile.password ?? "",
-    email: undefined,
-    accountId: undefined,
-    tenantId: undefined,
-    port: 0,
-    authenticationType: profile.authenticationType ?? "SqlLogin",
-    azureAccountToken: undefined,
-    expiresOn: undefined,
-    encrypt: "Optional",
-    trustServerCertificate: undefined,
-    hostNameInCertificate: undefined,
-    persistSecurityInfo: undefined,
-    columnEncryptionSetting: undefined,
-    attestationProtocol: undefined,
-    enclaveAttestationUrl: undefined,
-    connectTimeout: undefined,
-    commandTimeout: undefined,
-    connectRetryCount: undefined,
-    connectRetryInterval: undefined,
-    applicationName: undefined,
-    workstationId: undefined,
-    applicationIntent: undefined,
-    currentLanguage: undefined,
-    pooling: undefined,
-    maxPoolSize: undefined,
-    minPoolSize: undefined,
-    loadBalanceTimeout: undefined,
-    replication: undefined,
-    attachDbFilename: undefined,
-    failoverPartner: undefined,
-    multiSubnetFailover: undefined,
-    multipleActiveResultSets: undefined,
-    packetSize: undefined,
-    typeSystemVersion: undefined,
-    connectionString: undefined,
-    secureEnclaves: undefined,
-    containerName: undefined,
+    connectionId: profile.id,
+    database: database ?? profile.database,
   };
 }

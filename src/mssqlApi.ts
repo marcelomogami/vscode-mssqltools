@@ -1,7 +1,11 @@
 import * as vscode from "vscode";
-import type { IExtension, IConnectionInfo, IScriptingObject } from "vscode-mssql";
+import type { IExtension, IScriptingObject } from "vscode-mssql";
 
 const MSSQL_EXTENSION_ID = "ms-mssql.mssql";
+const OUR_EXTENSION_ID = "marcelomogami.vscode-mssqltools";
+
+// ScriptOperation.Create = 1 (stable enum value from vscode-mssql d.ts)
+const SCRIPT_CREATE = 1 as unknown as import("vscode-mssql").ScriptOperation;
 
 function getApi(): IExtension {
   const ext = vscode.extensions.getExtension<IExtension>(MSSQL_EXTENSION_ID);
@@ -14,13 +18,17 @@ function getApi(): IExtension {
   return ext.exports;
 }
 
-export async function connect(connectionInfo: IConnectionInfo): Promise<string> {
+export async function connect(
+  connectionId: string,
+  database?: string,
+): Promise<string> {
   const api = getApi();
-  return api.connect(connectionInfo, false);
+  const uri = await api.connectionSharing.connect(OUR_EXTENSION_ID, connectionId, database);
+  if (!uri) {
+    throw new Error("Failed to establish connection. Make sure the connection is active in the SQL Server panel.");
+  }
+  return uri;
 }
-
-// ScriptOperation.Create = 1 (stable enum value from vscode-mssql d.ts)
-const SCRIPT_CREATE = 1 as unknown as import("vscode-mssql").ScriptOperation;
 
 export async function scriptProcedure(
   connectionUri: string,
@@ -45,6 +53,9 @@ export async function scriptProcedure(
 }
 
 export function disconnect(connectionUri: string): void {
-  const api = getApi();
-  api.connectionSharing.disconnect(connectionUri);
+  try {
+    getApi().connectionSharing.disconnect(connectionUri);
+  } catch {
+    // best-effort cleanup
+  }
 }

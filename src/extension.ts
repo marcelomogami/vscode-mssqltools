@@ -4,7 +4,7 @@ import os from "node:os";
 import fs from "node:fs/promises";
 import { readConfig } from "./config.ts";
 import { parseProcedure } from "./procedureParser.ts";
-import { resolveProfile } from "./profileResolver.ts";
+import { resolveConnectionId } from "./profileResolver.ts";
 import { pickEnvironment } from "./envPicker.ts";
 import { connect, scriptProcedure, disconnect } from "./mssqlApi.ts";
 import { initLogger, log, logError } from "./logger.ts";
@@ -48,12 +48,12 @@ async function commandDiffProcedure(): Promise<void> {
     if (!env) return;
 
     const database = env.database ?? cfg.defaultDatabase;
-    const connInfo = resolveProfile(env.name, database);
+    const resolved = resolveConnectionId(env.name, database);
 
     let connectionUri: string | undefined;
     const ddl = await withProgress(`Fetching [${proc.schema}].[${proc.name}] from ${env.name}`, async (report) => {
       report(`Connecting to ${env.name}…`);
-      connectionUri = await connect(connInfo);
+      connectionUri = await connect(resolved.connectionId, resolved.database);
       report(`Scripting procedure…`);
       return scriptProcedure(connectionUri, proc.schema, proc.name);
     });
@@ -61,7 +61,7 @@ async function commandDiffProcedure(): Promise<void> {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "mssqltools-diff-"));
     diffTempDirs.add(tmpDir);
     const tmpFile = path.join(tmpDir, `${proc.name}.sql`);
-    await fs.writeFile(tmpFile, ddl, "utf8");
+    await fs.writeFile(tmpFile, "﻿" + ddl, "utf8");
 
     const remoteUri = vscode.Uri.file(tmpFile);
     const title = `${proc.name} (${env.name}: remote ↔ local)`;
@@ -98,12 +98,12 @@ async function commandOpenProcedure(): Promise<void> {
     if (!env) return;
 
     const database = env.database ?? cfg.defaultDatabase;
-    const connInfo = resolveProfile(env.name, database);
+    const resolved = resolveConnectionId(env.name, database);
 
     let connectionUri: string | undefined;
     const ddl = await withProgress(`Fetching [${proc.schema}].[${proc.name}] from ${env.name}`, async (report) => {
       report(`Connecting to ${env.name}…`);
-      connectionUri = await connect(connInfo);
+      connectionUri = await connect(resolved.connectionId, resolved.database);
       report(`Scripting procedure…`);
       return scriptProcedure(connectionUri, proc.schema, proc.name);
     });
@@ -111,7 +111,7 @@ async function commandOpenProcedure(): Promise<void> {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "mssqltools-open-"));
     diffTempDirs.add(tmpDir);
     const tmpFile = path.join(tmpDir, `${proc.name}_${env.name}.sql`);
-    await fs.writeFile(tmpFile, ddl, "utf8");
+    await fs.writeFile(tmpFile, "﻿" + ddl, "utf8");
 
     const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(tmpFile));
     await vscode.window.showTextDocument(doc, { preview: true });
