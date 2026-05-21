@@ -64,8 +64,8 @@ async function commandDiffProcedure(): Promise<void> {
     await fs.writeFile(tmpFile, "﻿" + ddl, "utf8");
 
     const remoteUri = vscode.Uri.file(tmpFile);
-    const title = `${proc.name} (${env.name}: remote ↔ local)`;
-    await vscode.commands.executeCommand("vscode.diff", remoteUri, editor.document.uri, title);
+    const title = `${proc.name} (${env.name}: local ↔ remote)`;
+    await vscode.commands.executeCommand("vscode.diff", editor.document.uri, remoteUri, title);
     log(`Diff opened: [${proc.schema}].[${proc.name}] from ${env.name}`);
   } catch (err) {
     logError("Diff failed", err);

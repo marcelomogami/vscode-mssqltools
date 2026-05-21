@@ -2,7 +2,7 @@
   "name": "vscode-mssqltools",
   "displayName": "MSSQL Tools",
   "description": "Compare stored procedures across SQL Server environments directly from VSCode, using your existing MSSQL extension connections.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "marcelomogami",
   "private": true,
   "type": "module",

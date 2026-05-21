@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.1] - 2026-05-21
+
+### Fixed
+- Diff now shows local file on the left and remote procedure on the right
+
 ## [0.1.0] - 2026-05-21
 
 ### Added
